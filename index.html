@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>🍂 秋天乐园 🍁</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<style>
+/* ── Reset & Base ── */
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;overflow-x:hidden;background:#000}
+button{outline:none;user-select:none}
+
+/* ── Page Control ── */
+.page{display:none;width:100%;height:100%}
+.page.active{display:block}
+
+/* ── Shutter Flash Effect ── */
+@keyframes shutterFlash {
+    0% { opacity: 0; }
+    10% { opacity: 1; }
+    100% { opacity: 0; }
+}
+.shutter-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #fff; z-index: 9999; pointer-events: none;
+    opacity: 0;
+}
+.shutter-overlay.flash {
+    animation: shutterFlash 0.3s ease-out;
+}
+
+/* ── Landing Page ── */
+.landing-page {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #fff7ed, #fef3c7, #fee2e2);
+    /* Added padding-bottom to prevent footer overlap */
+    padding: 48px 24px 100px 24px; 
+    position: relative;
+    overflow: hidden;
+    display: none; 
+    flex-direction: column; 
+    align-items: center;
+    justify-content: center;
+}
+.landing-page.active { display: flex; }
+.landing-content{ max-width: 800px; text-align: center; position: relative; z-index: 2; padding-top: 20px; flex: 1; display: flex; flex-direction: column; justify-content: center;}
+.landing-title{ font-size: 4rem; font-weight: bold; color: #78350f; margin-bottom: 24px; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
+.landing-subtitle{ font-size: 1.5rem; color: #92400e; margin-bottom: 32px; line-height: 1.6; }
+.landing-intro{ font-size: 1.1rem; color: #78350f; line-height: 1.8; margin-bottom: 40px; background: rgba(255,255,255,0.6); padding: 24px; border-radius: 16px; backdrop-filter: blur(10px); }
+.big-enter-button{ display: inline-block; padding: 20px 60px; font-size: 1.5rem; font-weight: 700; background: linear-gradient(135deg, #f59e0b, #f97316, #dc2626); color: #fff; border: none; border-radius: 50px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(245,158,11,0.4); text-transform: uppercase; letter-spacing: 2px; }
+.big-enter-button:hover{ transform: translateY(-5px) scale(1.05); box-shadow: 0 15px 40px rgba(245,158,11,0.6); }
+
+/* Adjusted margin-top to pull content up */
+.features-mini{ display: flex; justify-content: center; gap: 40px; margin-top: 30px; flex-wrap: wrap; }
+.feature-mini{ text-align: center; color: #92400e; font-size: 0.95rem; }
+.feature-mini-icon{ font-size: 2rem; margin-bottom: 8px; }
+
+.leaves-background { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; z-index: 0; }
+.leaf-bg { position: absolute; top: 0; width: 60px; height: 60px; transform: translateY(-100%); opacity: 0.7; animation: fall linear infinite; }
+.leaf-bg svg { width: 100%; height: 100%; }
+@keyframes fall { 0% { transform: translateY(-100%) rotate(0deg); opacity: 0.7; } 100% { transform: translateY(120vh) rotate(360deg); opacity: 0.3; } }
+.leaf-bg:nth-child(1) { left: 10%; animation-duration: 15s; animation-delay: 0s; }
+.leaf-bg:nth-child(2) { left: 25%; animation-duration: 18s; animation-delay: 2s; }
+.leaf-bg:nth-child(3) { left: 40%; animation-duration: 20s; animation-delay: 4s; }
+.leaf-bg:nth-child(4) { left: 55%; animation-duration: 16s; animation-delay: 6s; }
+.leaf-bg:nth-child(5) { left: 70%; animation-duration: 22s; animation-delay: 8s; }
+.leaf-bg:nth-child(6) { left: 85%; animation-duration: 19s; animation-delay: 10s; }
+.lang-toggle-landing { position: absolute; top: 0; right: 0; z-index: 100; }
+
+@media(max-width: 768px){ .landing-title{font-size: 2.5rem;} .landing-subtitle{font-size: 1.2rem;} .landing-intro{font-size: 1rem;} .big-enter-button{padding: 16px 40px; font-size: 1.2rem;} }
+
+/* ── Color Selection Page ── */
+.color-selection-page {
+    min-height: 100vh;
+    background-color: #fffbf0;
+    background-image: radial-gradient(#fde68a 1px, transparent 1px);
+    background-size: 24px 24px;
+    display: none;
+    flex-direction: column;
+    position: relative;
+}
+.color-selection-page.active { display: flex; }
+
+.header-elegant {
+    text-align: center;
+    padding: 40px 24px 20px;
+    background: linear-gradient(to bottom, #fffbf0, rgba(255,251,240,0));
+}
+.header-elegant .title {
+    font-family: "Times New Roman", serif;
+    font-size: 2.2rem;
+    color: #78350f;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+}
+.header-elegant .subtitle {
+    color: #92400e;
+    font-size: 1rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+.lang-toggle-simple {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.lang-btn-simple {
+    background: transparent;
+    border: none;
+    font-size: 0.9rem;
+    color: #b45309;
+    cursor: pointer;
+    padding: 4px 8px;
+    position: relative;
+    font-weight: 500;
+}
+.lang-btn-simple.active { color: #78350f; font-weight: 700; }
+.lang-btn-simple.active::after {
+    content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: #78350f;
+}
+
+.palette-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 20px;
+}
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 20px;
+}
+.color-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.color-item:active { transform: scale(0.95); }
+.color-box {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 3px solid #fff;
+}
+.color-box.selected {
+    transform: scale(1.15);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    border-color: #fff;
+}
+.color-box.selected::after {
+    content: '';
+    position: absolute;
+    top: -6px; left: -6px; right: -6px; bottom: -6px;
+    border: 2px solid #f59e0b;
+    border-radius: 50%;
+    animation: spinIn 0.4s ease-out;
+}
+@keyframes spinIn { from{transform: rotate(-90deg) scale(0.8); opacity:0;} to{transform: rotate(0) scale(1); opacity:1;} }
+
+.check-icon {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 1.6rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.color-label {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: #57534e;
+    font-weight: 500;
+}
+
+.bottom-dock {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 24px;
+    padding: 12px 20px;
+    box-shadow: 0 10px 40px -10px rgba(0,0,0,0.15);
+    border: 1px solid rgba(255,255,255,0.6);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 100;
+    animation: slideUp 0.5s ease-out;
+}
+@keyframes slideUp { from{transform: translate(-50%, 100%);} to{transform: translate(-50%, 0);} }
+
+.dock-slots {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.slot {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: #f3f4f6;
+    border: 2px dashed #d1d5db;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #d1d5db;
+    font-size: 1.2rem;
+    transition: all 0.3s;
+}
+.slot.filled {
+    border: none;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: scale(1.05);
+}
+
+.start-btn-elegant {
+    padding: 14px 32px;
+    background: #e5e7eb;
+    color: #9ca3af;
+    border: none;
+    border-radius: 18px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: not-allowed;
+    transition: all 0.3s;
+    white-space: nowrap;
+}
+.start-btn-elegant:not(:disabled) {
+    background: linear-gradient(135deg, #f59e0b, #ea580c);
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(234, 88, 12, 0.3);
+    transform: translateY(-1px);
+}
+.start-btn-elegant:not(:disabled):hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(234, 88, 12, 0.4);
+}
+
+/* ── Creator Badge / Footer (Cute & Visible) ── */
+.creator-footer {
+    /* Layout & Shape */
+    width: fit-content;
+    margin: 0 auto;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    
+    /* Cute Glassmorphism Style */
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 8px 20px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 6px 15px rgba(180, 83, 9, 0.15);
+    
+    /* Typography */
+    font-size: 0.85rem;
+    color: #78350f;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.creator-footer:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(180, 83, 9, 0.25);
+}
+
+/* Landing Page Positioning */
+#landing .creator-footer {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Color Page Positioning */
+#color-selection .creator-footer {
+    margin-top: auto;
+    margin-bottom: 140px; /* Above the dock */
+}
+
+.creator-footer span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+}
+
+.creator-footer a {
+    color: #dc2626;
+    text-decoration: none;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 10px;
+    background: rgba(255,247,237, 0.5);
+    transition: all 0.2s;
+}
+
+.creator-footer a:hover {
+    background: #fff;
+    color: #ea580c;
+}
+
+/* ── Camera & Game UI ── */
+.camera-page{position:relative;width:100vw;height:100vh;background:#000;overflow:hidden}
+.back-button{position:absolute;top:16px;left:16px;z-index:10;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 6px rgba(0,0,0,.1)}
+.video-container{position:relative;width:100%;height:100%}
+#camera-video{width:100%;height:100%;object-fit:cover}
+#motion-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;display:none}
+
+.leaf {
+    position: absolute;
+    pointer-events: none;
+    user-select: none;
+    z-index: 2;
+    width: 50px;
+    height: 50px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    will-change: transform; /* Optimize for GPU */
+    left: 0; top: 0;
+}
+
+.camera-controls{position:absolute;bottom:0;left:0;right:0;padding:24px;display:flex;justify-content:center;gap:16px;z-index:5}
+.capture-button{width:80px;height:80px;border-radius:50%;background:#fff;border:4px solid #d1d5db;cursor:pointer;transition:.2s}
+.capture-button:hover{border-color:#f59e0b}
+.action-button{padding:12px 24px;border-radius:12px;font-weight:600;cursor:pointer;transition:.2s;border:none;font-size:1rem}
+.retake-button{background:rgba(255,255,255,.9);color:#1f2937}
+.download-button{background:linear-gradient(135deg,#f59e0b,#f97316);color:#fff;display:flex;align-items:center;gap:8px}
+#captured-image{width:100%;height:100%;object-fit:contain}
+.hidden{display:none!important}
+.info-panel{position:absolute;top:16px;right:16px;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);color:#fff;padding:16px;border-radius:12px;font-size:.9rem;z-index:10;max-width:250px;border:1px solid rgba(255,255,255,0.2)}
+.info-panel h3{margin-bottom:8px;font-size:1rem;color:#fbbf24}
+.info-panel ul{list-style:none;padding:0}
+.info-panel li{margin-bottom:6px;padding-left:20px;position:relative}
+.info-panel li:before{content:"✨";position:absolute;left:0}
+.gesture-indicator{position:absolute;bottom:120px;left:50%;transform:translateX(-50%);background:rgba(251,191,36,.9);color:#78350f;padding:8px 20px;border-radius:20px;font-weight:600;font-size:.9rem;z-index:10;opacity:0;transition:opacity .3s}
+.gesture-indicator.show{opacity:1}
+
+/* Optimized, Subtle Fireworks */
+.firework-particle{
+    position:absolute;
+    pointer-events:none;
+    border-radius:50%;
+    z-index:3;
+    /* Reduced shadow for refined look */
+    box-shadow:0 0 4px currentColor; 
+    will-change: transform, opacity;
+    left: 0; top: 0;
+}
+
+/* ── Countdown & Text ── */
+.countdown-overlay{
+    position:absolute;top:0;left:0;width:100%;height:100%;
+    z-index:100;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    pointer-events: none;
+}
+.countdown-number{
+    font-size:15rem; font-weight:900;
+    text-shadow: 0 0 30px rgba(0,0,0,0.5), 0 0 60px currentColor;
+    animation:countPulse 0.8s ease-out;
+}
+@keyframes countPulse{ 0%{transform:scale(0.5);opacity:0} 50%{transform:scale(1.2);opacity:1} 100%{transform:scale(1);opacity:1} }
+.countdown-text{
+    font-size:4rem; font-weight:900;
+    text-align: center; line-height: 1.2; padding: 0 20px;
+    animation: textPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 15px rgba(0,0,0,0.8));
+}
+@keyframes textPop{ from{transform:scale(0.5);opacity:0;} to{transform:scale(1);opacity:1;} }
+
+@media(min-width: 768px){
+    .color-grid{ grid-template-columns: repeat(6, 1fr); }
+    .header-elegant .title { font-size: 3rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- Shutter Overlay -->
+<div id="shutter" class="shutter-overlay"></div>
+
+<!-- ────────────────────── Landing Page ────────────────────── -->
+<div id="landing" class="page active landing-page">
+    <div class="landing-content">
+        <div class="lang-toggle lang-toggle-landing">
+            <button class="lang-btn lang-btn-simple active" data-lang="zh">中文</button>
+            <button class="lang-btn lang-btn-simple" data-lang="en">English</button>
+        </div>
+        <h1 class="landing-title" data-lang-key="main_title">🍂 秋天乐园 🍁</h1>
+        <p class="landing-subtitle" data-lang-key="main_subtitle">创造属于你的秋日回忆，让落叶随你的手势起舞。</p>
+        <p class="landing-intro" data-lang-key="intro">欢迎来到秋天乐园！选出你喜欢的秋季色彩，打开镜头后便能和落叶一起玩耍。同色的叶子相遇时，会绽放出绚烂的烟花。你也可以拍照，把这一刻记录下来。</p>
+        <button id="enter-app" class="big-enter-button" data-lang-key="enter_button">🍂 开始秋日冒险 🍁</button>
+        <div class="features-mini">
+            <div class="feature-mini"><div class="feature-mini-icon">🎨</div><div data-lang-key="mini_feature1">选择秋色</div></div>
+            <div class="feature-mini"><div class="feature-mini-icon">👋</div><div data-lang-key="mini_feature2">手势互动</div></div>
+            <div class="feature-mini"><div class="feature-mini-icon">📸</div><div data-lang-key="mini_feature3">捕捉回忆</div></div>
+        </div>
+    </div>
+
+    <!-- CREATOR BADGE LANDING (FIXED POSITION) -->
+    <div class="creator-footer">
+        <span>✨ Created by YiYue Qiao 🧡</span>
+        <a href="https://www.linkedin.com/in/yiyue-joanna-qiao-2a6415184?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3B3oBsD3SvRv6CnKjyraPqKw%3D%3D" target="_blank">📧 Contact Me</a>
+    </div>
+
+    <div class="leaves-background">
+        <div class="leaf-bg"><svg viewBox="0 0 100 100"><path d="M50 10 L55 35 L70 30 L60 50 L80 55 L60 65 L70 85 L50 75 L30 85 L40 65 L20 55 L40 50 L30 30 L45 35 Z" fill="#dc2626"/></svg></div>
+        <div class="leaf-bg"><svg viewBox="0 0 100 100"><path d="M50 15 Q55 20 55 30 Q60 35 60 40 Q55 40 55 50 Q60 55 60 65 Q55 70 50 85 Q45 70 40 65 Q40 55 45 50 Q40 40 40 40 Q40 35 45 30 Q45 20 50 15 Z" fill="#b45309"/></svg></div>
+        <div class="leaf-bg"><svg viewBox="0 0 100 100"><path d="M50 10 L54 32 L68 28 L58 45 L75 48 L60 58 L68 72 L52 65 L50 85 L48 65 L32 72 L40 58 L25 48 L42 45 L32 28 L46 32 Z" fill="#f59e0b"/></svg></div>
+        <div class="leaf-bg"><svg viewBox="0 0 100 100"><path d="M50 10 L55 35 L70 30 L60 50 L80 55 L60 65 L70 85 L50 75 L30 85 L40 65 L20 55 L40 50 L30 30 L45 35 Z" fill="#ea580c"/></svg></div>
+    </div>
+</div>
+
+<!-- ────────────────────── Color Selection Page ────────────────────── -->
+<div id="color-selection" class="page color-selection-page">
+    <div class="header-elegant">
+        <div class="lang-toggle-simple">
+            <button class="lang-btn lang-btn-simple active" data-lang="zh">中文</button>
+            <button class="lang-btn lang-btn-simple" data-lang="en">English</button>
+        </div>
+        <h1 class="title" data-lang-key="title">🍂 秋天乐园 🍁</h1>
+        <p class="subtitle" data-lang-key="subtitle">请选择 3 种喜欢的秋色，开启你的秋日奇幻之旅</p>
+    </div>
+
+    <div class="palette-container">
+        <div id="color-grid" class="color-grid"></div>
+    </div>
+
+    <!-- CREATOR BADGE COLOR PAGE (FIXED TEXT) -->
+    <div class="creator-footer">
+        <span>✨ Created by YiYue Qiao 🧡</span>
+        <a href="https://www.linkedin.com/in/yiyue-joanna-qiao-2a6415184?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3B3oBsD3SvRv6CnKjyraPqKw%3D%3D" target="_blank">📧 Contact Me</a>
+    </div>
+
+    <div class="bottom-dock">
+        <div class="dock-slots" id="dock-slots">
+            <div class="slot">+</div>
+            <div class="slot">+</div>
+            <div class="slot">+</div>
+        </div>
+        <button id="start-camera-btn" class="start-btn-elegant" disabled data-lang-key="start_button">
+            进入秋天乐园
+        </button>
+    </div>
+</div>
+
+<!-- ────────────────────── Game Page ────────────────────── -->
+<div id="camera" class="page camera-page">
+    <div class="info-panel" id="info-panel">
+        <h3 data-lang-key="gesture_title">互动手势</h3>
+        <ul>
+            <li data-lang-key="gesture_wave">挥手：吹散叶子</li>
+            <li data-lang-key="gesture_fast">快速移动：产生旋风</li>
+            <li data-lang-key="gesture_still">静止：叶子缓缓飘落</li>
+        </ul>
+    </div>
+    <div class="gesture-indicator" id="gesture-indicator"></div>
+    <button id="back-btn" class="back-button"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+    <div id="video-view" class="video-container">
+        <video id="camera-video" autoplay playsinline muted></video>
+        <canvas id="motion-canvas"></canvas>
+    </div>
+    <div id="image-view" class="video-container hidden"><img id="captured-image" alt="Captured photo"></div>
+    <div class="camera-controls">
+        <button id="capture-btn" class="capture-button"></button>
+        <button id="retake-btn" class="action-button retake-button hidden" data-lang-key="retake_button">重拍</button>
+        <button id="download-btn" class="action-button download-button hidden"><span data-lang-key="download_button">保存照片</span></button>
+    </div>
+    <canvas id="photo-canvas" style="display:none"></canvas>
+</div>
+
+<script>
+/* ────────────────────── Translations ────────────────────── */
+const translations = {
+    zh: {
+        main_title: '🍂 秋天乐园 🍁', main_subtitle: '创造属于你的秋日回忆，让落叶随你的手势起舞。', intro: '欢迎来到秋天乐园！选出你喜欢的秋季色彩，打开镜头后便能和落叶一起玩耍。同色的叶子相遇时，会绽放出绚烂的烟花。你也可以拍照，把这一刻记录下来。',
+        enter_button: '🍂 开始秋日冒险 🍁', mini_feature1: '选择秋色', mini_feature2: '手势互动', mini_feature3: '捕捉回忆',
+        title: '🍂 秋天乐园 🍁', subtitle: '请选择 3 种喜欢的秋色，开启你的秋日奇幻之旅',
+        start_button: '进入秋天乐园', gesture_title: '互动手势', gesture_wave: '挥手：吹散叶子', gesture_fast: '快速移动：产生旋风', gesture_still: '静止：叶子缓缓飘落',
+        retake_button: '重拍', download_button: '保存照片', countdown_text: '开始下秋叶雨啦',
+        colors: [
+            {name:'枫叶红',hex:'#D32F2F'},{name:'暮秋橙',hex:'#F57C00'},{name:'银杏金',hex:'#FFA000'},
+            {name:'南瓜橙',hex:'#FF6F00'},{name:'琥珀黄',hex:'#FFB300'},{name:'落日红',hex:'#E64A19'},
+            {name:'栗子棕',hex:'#795548'},{name:'暖茶色',hex:'#8D6E63'},{name:'秋草绿',hex:'#689F38'},
+            {name:'橄榄绿',hex:'#827717'},{name:'深秋紫',hex:'#6A1B9A'},{name:'砖红色',hex:'#BF360C'},
+            {name:'焦糖色',hex:'#A1887F'},{name:'蜂蜜金',hex:'#FFD54F'},{name:'柿子橙',hex:'#FF5722'},
+            {name:'苔藓绿',hex:'#558B2F'},{name:'深褐色',hex:'#5D4037'},{name:'玫瑰金',hex:'#F48FB1'},
+            {name:'天青色',hex:'#00BCD4'},{name:'薄荷绿',hex:'#26A69A'},{name:'湖水蓝',hex:'#0097A7'},
+            {name:'珊瑚粉',hex:'#FF7043'},{name:'梅子紫',hex:'#8E24AA'},{name:'薰衣草',hex:'#9575CD'},
+            {name:'桃花粉',hex:'#F06292'},{name:'柠檬黄',hex:'#FFEB3B'},{name:'青柠绿',hex:'#CDDC39'},
+            {name:'暖杏色',hex:'#FFAB91'},{name:'紫罗兰',hex:'#7E57C2'},{name:'翡翠绿',hex:'#00897B'}
+        ]
+    },
+    en: {
+        main_title: '🍂Autumn Playground🍁', main_subtitle: 'Create your own autumn memories and let the leaves dance at your gesture.', intro: 'Welcome to Autumn Playground! Choose your favorite autumn colors, then open your camera to play with the falling leaves. Fireworks burst when leaves of the same color collide. You can also take a photo to capture the moment.',
+        enter_button: '🍂 Start Autumn Adventure 🍁', mini_feature1: 'Choose Colors', mini_feature2: 'Gesture Control', mini_feature3: 'Capture Memories',
+        title: '🍂 Autumn Playground 🍁', subtitle: 'Please select 3 favorite autumn colors for your magical journey',
+        start_button: 'Enter Autumn Playground', gesture_title: 'Interactive Gestures', gesture_wave: 'Wave: Blow leaves away', gesture_fast: 'Fast motion: Create whirlwinds', gesture_still: 'Stay still: Gentle leaf rain',
+        retake_button: 'Retake', download_button: 'Save Photo', countdown_text: 'Let the leaves fall',
+        colors: [
+            {name:'Maple Red',hex:'#D32F2F'},{name:'Autumn Orange',hex:'#F57C00'},{name:'Ginkgo Gold',hex:'#FFA000'},
+            {name:'Pumpkin Orange',hex:'#FF6F00'},{name:'Amber Yellow',hex:'#FFB300'},{name:'Sunset Red',hex:'#E64A19'},
+            {name:'Chestnut Brown',hex:'#795548'},{name:'Warm Tea',hex:'#8D6E63'},{name:'Autumn Grass',hex:'#689F38'},
+            {name:'Olive Green',hex:'#827717'},{name:'Deep Purple',hex:'#6A1B9A'},{name:'Brick Red',hex:'#BF360C'},
+            {name:'Caramel',hex:'#A1887F'},{name:'Honey Gold',hex:'#FFD54F'},{name:'Persimmon',hex:'#FF5722'},
+            {name:'Moss Green',hex:'#558B2F'},{name:'Deep Brown',hex:'#5D4037'},{name:'Rose Gold',hex:'#F48FB1'},
+            {name:'Cyan',hex:'#00BCD4'},{name:'Mint Green',hex:'#26A69A'},{name:'Lake Blue',hex:'#0097A7'},
+            {name:'Coral Pink',hex:'#FF7043'},{name:'Plum Purple',hex:'#8E24AA'},{name:'Lavender',hex:'#9575CD'},
+            {name:'Peach Pink',hex:'#F06292'},{name:'Lemon Yellow',hex:'#FFEB3B'},{name:'Lime Green',hex:'#CDDC39'},
+            {name:'Apricot',hex:'#FFAB91'},{name:'Violet',hex:'#7E57C2'},{name:'Emerald',hex:'#00897B'}
+        ]
+    }
+};
+
+let currentLang = 'zh';
+function switchLanguage(lang) {
+    currentLang = lang;
+    document.querySelectorAll('.lang-btn').forEach(btn => { btn.classList.toggle('active', btn.dataset.lang === lang); });
+    document.querySelectorAll('[data-lang-key]').forEach(el => {
+        const key = el.getAttribute('data-lang-key');
+        if (translations[lang][key]) el.textContent = translations[lang][key];
+    });
+    const grid = document.getElementById('color-grid');
+    if(grid && grid.innerHTML){ grid.innerHTML = ''; initColors(); updateDock(); }
+}
+
+/* ────────────────────── Global Vars ────────────────────── */
+let selectedColors=[], leaves=[], cameraStream=null, animId=null, motionTimer=null;
+let fireworkParticles=[], prevGray=null, motionAreas=[];
+const $={
+    colorSelection:document.getElementById('color-selection'), camera:document.getElementById('camera'),
+    grid:document.getElementById('color-grid'), dockSlots:document.getElementById('dock-slots'),
+    startBtn:document.getElementById('start-camera-btn'), back:document.getElementById('back-btn'),
+    video:document.getElementById('camera-video'), motion:document.getElementById('motion-canvas'),
+    photo:document.getElementById('photo-canvas'), capture:document.getElementById('capture-btn'),
+    retake:document.getElementById('retake-btn'), download:document.getElementById('download-btn'),
+    videoView:document.getElementById('video-view'), imageView:document.getElementById('image-view'),
+    captured:document.getElementById('captured-image'), info:document.getElementById('info-panel'),
+    shutter:document.getElementById('shutter')
+};
+
+/* ────────────────────── 1. Color Logic ────────────────────── */
+function initColors(){
+    const colors = translations[currentLang].colors;
+    colors.forEach((c,i)=>{
+        const el=document.createElement('div');el.className='color-item';
+        const isSelected = selectedColors.some(sc => sc.hex === c.hex);
+        const selectedClass = isSelected ? 'selected' : '';
+        const checkHidden = isSelected ? '' : 'hidden';
+        el.innerHTML=`<div class="color-box ${selectedClass}" style="background:${c.hex}" data-i="${i}">
+            <span class="check-icon ${checkHidden}">✓</span></div><p class="color-label">${c.name}</p>`;
+        el.onclick=()=>toggle(i);
+        $.grid.appendChild(el);
+    });
+}
+
+function toggle(i){
+    const colors = translations[currentLang].colors;
+    const box=$.grid.querySelector(`[data-i="${i}"]`),chk=box.querySelector('.check-icon');
+    const idx=selectedColors.findIndex(v=>v.hex===colors[i].hex);
+    if(idx>-1){
+        selectedColors.splice(idx,1); box.classList.remove('selected'); chk.classList.add('hidden');
+    } else if(selectedColors.length<3){
+        selectedColors.push(colors[i]); box.classList.add('selected'); chk.classList.remove('hidden');
+    }
+    updateDock();
+}
+
+function updateDock() {
+    $.startBtn.disabled = !selectedColors.length;
+    $.dockSlots.innerHTML = '';
+    for(let i=0; i<3; i++) {
+        if(i < selectedColors.length) {
+            $.dockSlots.innerHTML += `<div class="slot filled" style="background:${selectedColors[i].hex}"></div>`;
+        } else {
+            $.dockSlots.innerHTML += `<div class="slot">+</div>`;
+        }
+    }
+}
+
+/* ────────────────────── 2. Motion ────────────────────── */
+const MOTION_THRESH=20, CLUSTER_DIST=40, MIN_POINTS=3;
+function detectMotion(){
+    const v=$.video, c=$.motion, ctx=c.getContext('2d');
+    if(!v.videoWidth) return;
+    const w=v.videoWidth/5, h=v.videoHeight/5;
+    if(c.width!==w){c.width=w;c.height=h;}
+    ctx.drawImage(v,0,0,w,h);
+    const cur=ctx.getImageData(0,0,w,h);
+    if(!prevGray){prevGray=toGray(cur);return;}
+    const g=toGray(cur), pts=[];
+    for(let y=2;y<h-2;y+=2){for(let x=2;x<w-2;x+=2){
+        const i=y*w+x; if(Math.abs(g[i]-prevGray[i])>MOTION_THRESH) pts.push({x,y});
+    }}
+    prevGray=g;
+    if(pts.length<MIN_POINTS){motionAreas=[];return;}
+    const cls=cluster(pts); 
+    const pw=v.offsetWidth/w, ph=v.offsetHeight/h;
+    motionAreas=cls.map(c=>{
+        const cx=c.reduce((s,p)=>s+p.x,0)/c.length; const cy=c.reduce((s,p)=>s+p.y,0)/c.length;
+        return {x:cx*pw,y:cy*ph,radius:Math.sqrt(c.length)*8,intensity:Math.min(c.length/150,.9)};
+    });
+}
+function toGray(d){const g=new Uint8Array(d.width*d.height); for(let i=0;i<g.length;i++){const p=i*4; g[i]=d.data[p]*.299+d.data[p+1]*.587+d.data[p+2]*.114;} return g;}
+function cluster(pts){
+    const vis=new Set(), out=[];
+    pts.forEach((p,i)=>{
+        if(vis.has(i)) return;
+        const grp=[p]; vis.add(i); const q=[i];
+        while(q.length){
+            const ci=q.shift();
+            pts.forEach((p2,j)=>{
+                if(vis.has(j)) return;
+                const d=Math.hypot(pts[ci].x-p2.x,pts[ci].y-p2.y);
+                if(d<CLUSTER_DIST){vis.add(j);grp.push(p2);q.push(j);}
+            });
+        }
+        if(grp.length>=MIN_POINTS) out.push(grp);
+    });
+    return out;
+}
+
+/* ────────────────────── 3. Leaf Class (Optimized) ────────────────────── */
+class Leaf{
+    constructor(col,w,h,itemType){
+        this.col=col; this.w=w; this.h=h;
+        this.itemType=itemType || 'leaf';
+        
+        this.angle = Math.random() * Math.PI * 2;
+        this.baseRot = Math.random() * 360;
+
+        if(this.itemType === 'leaf') this.svgType=Math.floor(Math.random()*3);
+        this.el=document.createElement('div'); this.el.className='leaf';
+        this.drawItem();
+        $.camera.appendChild(this.el);
+        
+        this.reset(true);
+    }
+    drawItem(){
+        const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+        svg.setAttribute('viewBox','0 0 100 100'); svg.style.width='100%'; svg.style.height='100%';
+        if(this.itemType === 'acorn'){
+            const nut=document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+            nut.setAttribute('cx','50');nut.setAttribute('cy','60');nut.setAttribute('rx','15');nut.setAttribute('ry','20');nut.setAttribute('fill','#D2691E');svg.appendChild(nut);
+            const cap=document.createElementNS('http://www.w3.org/2000/svg','path');cap.setAttribute('d','M35 50 Q35 35 50 35 Q65 35 65 50 L60 50 Q60 40 50 40 Q40 40 40 50 Z');cap.setAttribute('fill','#8B4513');svg.appendChild(cap);
+            const stem=document.createElementNS('http://www.w3.org/2000/svg','rect');stem.setAttribute('x','48');stem.setAttribute('y','30');stem.setAttribute('width','4');stem.setAttribute('height','5');stem.setAttribute('fill','#654321');svg.appendChild(stem);
+        } else {
+            const getDarker=(h)=>{
+                const rgb=parseInt(h.slice(1),16), r=Math.max(0,((rgb>>16)&255)-60), g=Math.max(0,((rgb>>8)&255)-60), b=Math.max(0,(rgb&255)-60);
+                return `rgb(${r},${g},${b})`;
+            };
+            let d='';
+            if(this.svgType===0) d='M50 10 L55 35 L70 30 L60 50 L80 55 L60 65 L70 85 L50 75 L30 85 L40 65 L20 55 L40 50 L30 30 L45 35 Z';
+            else if(this.svgType===1) d='M50 15 Q55 20 55 30 Q60 35 60 40 Q55 40 55 50 Q60 55 60 65 Q55 70 50 85 Q45 70 40 65 Q40 55 45 50 Q40 40 40 40 Q40 35 45 30 Q45 20 50 15 Z';
+            else d='M50 10 L54 32 L68 28 L58 45 L75 48 L60 58 L68 72 L52 65 L50 85 L48 65 L32 72 L40 58 L25 48 L42 45 L32 28 L46 32 Z';
+            const path=document.createElementNS('http://www.w3.org/2000/svg','path'); path.setAttribute('d',d); path.setAttribute('fill',this.col); svg.appendChild(path);
+            const v=document.createElementNS('http://www.w3.org/2000/svg','line'); v.setAttribute('x1','50');v.setAttribute('y1','15');v.setAttribute('x2','50');v.setAttribute('y2','75'); v.setAttribute('stroke',getDarker(this.col));v.setAttribute('stroke-width','1.5'); svg.appendChild(v);
+        }
+        this.el.appendChild(svg);
+    }
+    reset(initial=false){
+        this.x=Math.random()*this.w; 
+        if(initial) {
+            this.y = -50 - Math.random() * 1000;
+        } else {
+            this.y = -60 - Math.random() * 100;
+        }
+        this.sz = (this.itemType==='acorn') ? 25+Math.random()*10 : 30+Math.random()*20;
+        if(this.itemType === 'acorn'){
+             this.speed = 0.8 + Math.random() * 0.4;
+             this.rotSp = (Math.random() - 0.5) * 0.2; 
+             this.isRocking = true;
+             this.swayAmp = 0.5;
+        } else {
+             this.speed = 0.2 + Math.random() * 0.3; 
+             this.rotSp = (Math.random() - 0.5) * 0.2; 
+             this.isRocking = true;
+             this.swayAmp = 1.5 + Math.random() * 2.5;
+        }
+        this.swayFreq = 0.001 + Math.random() * 0.002; 
+        this.rot = this.baseRot;
+        this.vx=0;this.vy=0;this.affected=0;this.isResetting=false;this.activeForCollision=false;
+        if(this.el){
+            this.el.style.transform = `translate3d(${this.x}px, ${this.y}px, 0) rotate(${this.rot}deg)`;
+            this.el.style.width=`${this.sz}px`;this.el.style.height=`${this.sz}px`;this.el.style.opacity='1';
+        }
+    }
+    update(){
+        if(this.isResetting) return;
+        if(this.y>this.h+80 || this.x<-120 || this.x>this.w+120){
+            this.isResetting=true; this.reset();
+            this.el.style.transform = `translate3d(${this.x}px, ${this.y}px, 0) rotate(${this.rot}deg)`;
+            setTimeout(()=>{this.isResetting=false;},50); return;
+        }
+        let hasMotion=false;
+        motionAreas.forEach(a=>{
+            const dx=this.x-a.x, dy=this.y-a.y, dist=Math.hypot(dx,dy);
+            if(dist<a.radius){
+                hasMotion=true; const f=(a.radius-dist)/a.radius*a.intensity*3; const ang=Math.atan2(dy,dx); 
+                this.vx+=Math.cos(ang)*f; this.vy+=Math.sin(ang)*f; 
+                this.affected=18;
+            }
+        });
+        if(this.affected>0){
+            this.x+=this.vx; this.y+=this.vy; 
+            this.vx*=.95; this.vy*=.95; 
+            this.affected--;
+            this.rot += this.rotSp * 5;
+        } else {
+            this.y+=this.speed; 
+            this.angle += this.swayFreq * 10; 
+            const swayOffset = Math.sin(this.angle) * this.swayAmp;
+            this.x += swayOffset * 0.5;
+            if(this.isRocking){
+                const rockAngle = Math.cos(this.angle) * (this.itemType==='acorn' ? 10 : 25); 
+                this.rot += this.rotSp; 
+                var displayRot = this.rot + rockAngle;
+            } else {
+                this.rot += this.rotSp;
+                var displayRot = this.rot;
+            }
+        }
+        if(!this.activeForCollision && this.y>0) this.activeForCollision=true;
+        const r = (this.affected > 0 || !this.isRocking) ? this.rot : (this.rot + Math.cos(this.angle) * (this.itemType==='acorn'?10:25));
+        this.el.style.transform = `translate3d(${this.x}px, ${this.y}px, 0) rotate(${r}deg)`;
+    }
+    remove(){if(this.el&&this.el.parentNode) this.el.parentNode.removeChild(this.el);}
+}
+
+/* ────────────────────── 4. Game Logic ────────────────────── */
+async function startCam(){
+    try{
+        cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}},audio:false});
+        $.video.srcObject=cameraStream;
+        await new Promise(r=>{$.video.onloadedmetadata=()=>{$.video.play();r();}});
+        $.colorSelection.classList.remove('active'); $.camera.classList.add('active');
+        $.videoView.classList.remove('hidden'); $.imageView.classList.add('hidden');
+        $.capture.classList.remove('hidden'); $.retake.classList.add('hidden'); $.download.classList.add('hidden');
+        showCountdown();
+    }catch(e){alert(currentLang === 'zh' ? '相机权限被拒' : 'Camera permission denied');goBack();}
+}
+
+function showCountdown(){
+    const overlay = document.createElement('div'); overlay.className = 'countdown-overlay';
+    const colors = selectedColors.map(c => c.hex);
+    let colorIndex = 0;
+    const numberEl = document.createElement('div'); numberEl.className = 'countdown-number'; numberEl.style.color = colors[0];
+    const textEl = document.createElement('div'); textEl.className = 'countdown-text';
+    overlay.appendChild(numberEl); overlay.appendChild(textEl); $.camera.appendChild(overlay);
+    let count = 3;
+    const updateCountdown = () => {
+        if(count > 0){
+            numberEl.textContent = count; numberEl.style.color = colors[colorIndex % colors.length]; textEl.textContent = ''; colorIndex++; count--;
+            numberEl.style.animation = 'none'; setTimeout(() => { numberEl.style.animation = 'countPulse 0.8s ease-out'; }, 10);
+            setTimeout(updateCountdown, 1000);
+        } else {
+            numberEl.style.display = 'none'; textEl.textContent = translations[currentLang].countdown_text;
+            if(colors.length >= 2) textEl.style.backgroundImage = `linear-gradient(45deg, ${colors[0]}, ${colors[1]}, ${colors[2] || colors[0]})`; else textEl.style.color = colors[0];
+            initLeaves(); 
+            setTimeout(() => {
+                overlay.style.transition = 'opacity 0.5s'; overlay.style.opacity = '0';
+                setTimeout(() => overlay.remove(), 500);
+                setTimeout(()=>{ $.info.style.opacity='0'; setTimeout(()=>{$.info.style.display='none';},300); },4000);
+            }, 1200);
+        }
+    };
+    updateCountdown();
+}
+
+function initLeaves(){
+    const r=$.video.getBoundingClientRect();
+    const leafCount = 55; const acornCount = 4;
+    for(let i=0;i<leafCount;i++){
+        const randomColor = selectedColors[Math.floor(Math.random() * selectedColors.length)].hex;
+        leaves.push(new Leaf(randomColor,r.width,r.height,'leaf'));
+    }
+    for(let i=0;i<acornCount;i++){ leaves.push(new Leaf(null,r.width,r.height,'acorn')); }
+    motionTimer=setInterval(detectMotion,60);
+    animId=requestAnimationFrame(anim);
+}
+
+function anim(){
+    leaves.forEach(l=>l.update());
+    checkCollisions();
+    updateFireworkParticles();
+    animId=requestAnimationFrame(anim);
+}
+
+function checkCollisions(){
+    const leafItems = leaves.filter(l => l.itemType === 'leaf' && !l.isResetting && l.activeForCollision);
+    const acornItems = leaves.filter(l => l.itemType === 'acorn' && !l.isResetting && l.activeForCollision);
+    const visibleLeafs = leafItems.filter(l => l.y > 0);
+    const visibleAcorns = acornItems.filter(l => l.y > 0);
+    
+    for(let i = 0; i < visibleLeafs.length; i++){
+        for(let j = i + 1; j < visibleLeafs.length; j++){
+            const l1 = visibleLeafs[i]; const l2 = visibleLeafs[j];
+            if(l1.col === l2.col){
+                const dx = l1.x - l2.x; const dy = l1.y - l2.y;
+                if(Math.sqrt(dx*dx + dy*dy) < (l1.sz + l2.sz) / 2 * 0.8){
+                    createFirework((l1.x + l2.x) / 2, (l1.y + l2.y) / 2, l1.col);
+                    resetLeafWithAnimation(l1); resetLeafWithAnimation(l2); break;
+                }
+            }
+        }
+    }
+    for(let i = 0; i < visibleAcorns.length; i++){
+        const acorn = visibleAcorns[i];
+        for(let j = 0; j < visibleLeafs.length; j++){
+            const leaf = visibleLeafs[j];
+            const dx = acorn.x - leaf.x; const dy = acorn.y - leaf.y;
+            if(Math.hypot(dx,dy) < (acorn.sz + leaf.sz) / 2 * 0.8){
+                createThreeColorFirework(leaf.x, leaf.y); resetLeafWithAnimation(leaf); break;
+            }
+        }
+    }
+    for(let i = 0; i < visibleAcorns.length; i++){
+        for(let j = i + 1; j < visibleAcorns.length; j++){
+            const a1 = visibleAcorns[i]; const a2 = visibleAcorns[j];
+            const dx = a1.x - a2.x; const dy = a1.y - a2.y;
+            if(Math.sqrt(dx*dx + dy*dy) < (a1.sz + a2.sz) / 2 * 0.8){
+                createThreeColorFirework((a1.x + a2.x)/2, (a1.y + a2.y)/2);
+                resetLeafWithAnimation(a1); resetLeafWithAnimation(a2); break;
+            }
+        }
+    }
+}
+function resetLeafWithAnimation(leaf){
+    if(leaf.isResetting) return;
+    leaf.isResetting = true; leaf.el.style.opacity = '0';
+    setTimeout(() => { leaf.reset(); setTimeout(() => { leaf.isResetting = false; }, 50); }, 300);
+}
+function createFirework(x, y, color){
+    for(let i = 0; i < 35; i++){
+        const angle = (Math.PI * 2 * i) / 35; 
+        const speed = 1.0 + Math.random() * 2.0; const size = 2 + Math.random() * 3;
+        spawnParticle(x,y,size,adjustBrightness(color,0.8+Math.random()*0.4),Math.cos(angle)*speed,Math.sin(angle)*speed);
+    }
+}
+function createThreeColorFirework(x, y){
+    const cols = selectedColors.map(c=>c.hex);
+    for(let i = 0; i < 25; i++){
+        const angle = (Math.PI * 2 * i) / 25; 
+        const speed = 1.0 + Math.random() * 2.0; const size = 2 + Math.random() * 3;
+        spawnParticle(x,y,size,cols[i%cols.length]||cols[0],Math.cos(angle)*speed,Math.sin(angle)*speed);
+    }
+}
+function spawnParticle(x,y,s,c,vx,vy){
+    const p=document.createElement('div');
+    p.className='firework-particle';
+    p.style.left='0'; p.style.top='0';
+    p.style.transform=`translate3d(${x}px, ${y}px, 0)`;
+    p.style.width=s+'px';p.style.height=s+'px';
+    p.style.backgroundColor=c;p.style.color=c;p.style.boxShadow=`0 0 ${s*2}px currentColor`; 
+    $.camera.appendChild(p);
+    fireworkParticles.push({el:p,x:x,y:y,vx:vx,vy:vy,life:1.0,gravity:0.08});
+}
+function updateFireworkParticles(){
+    fireworkParticles = fireworkParticles.filter(p => {
+        p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.life -= 0.015;
+        if(p.life <= 0){ p.el.remove(); return false; }
+        p.el.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`; 
+        p.el.style.opacity = p.life; return true;
+    });
+}
+function adjustBrightness(hex, factor){
+    const r = parseInt(hex.slice(1,3), 16), g = parseInt(hex.slice(3,5), 16), b = parseInt(hex.slice(5,7), 16);
+    const nr = Math.min(255, Math.floor(r * factor)), ng = Math.min(255, Math.floor(g * factor)), nb = Math.min(255, Math.floor(b * factor));
+    return `#${nr.toString(16).padStart(2,'0')}${ng.toString(16).padStart(2,'0')}${nb.toString(16).padStart(2,'0')}`;
+}
+
+/* ────────────────────── 6. Photo Logic ────────────────────── */
+function stopCam(){
+    if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null;}
+    if(motionTimer){clearInterval(motionTimer);motionTimer=null;}
+    if(animId){cancelAnimationFrame(animId);animId=null;}
+    leaves.forEach(l=>l.remove());leaves=[];
+    fireworkParticles.forEach(p=>p.el.remove());fireworkParticles=[];
+    prevGray=null;motionAreas=[];
+}
+
+function takePhoto(){
+    // Instant feedback
+    $.shutter.classList.add('flash');
+    setTimeout(() => $.shutter.classList.remove('flash'), 300);
+
+    // Defer heavy lifting to next frame to allow UI update
+    requestAnimationFrame(() => {
+        const v=$.video, w=v.videoWidth, h=v.videoHeight; 
+        $.photo.width=w; $.photo.height=h;
+        const ctx=$.photo.getContext('2d'); 
+        
+        // 1. Draw Video
+        ctx.drawImage(v,0,0,w,h);
+        
+        const rect = $.video.getBoundingClientRect();
+        const scaleX = w / rect.width;
+        const scaleY = h / rect.height;
+
+        // 2. Draw Leaves
+        leaves.forEach(l => {
+            if(l.isResetting || l.y < -50) return;
+            ctx.save();
+            ctx.translate(l.x * scaleX, l.y * scaleY);
+            let r = l.rot;
+            if(l.itemType !== 'acorn'){ r += Math.cos(l.angle) * 25; } else { r += Math.cos(l.angle) * 10; }
+            ctx.rotate(r * Math.PI / 180);
+            const s = (l.sz * scaleX) / 100; ctx.scale(s, s);
+            ctx.translate(-50, -50);
+            
+            if(l.itemType === 'acorn'){
+                ctx.fillStyle = '#D2691E'; ctx.beginPath(); ctx.ellipse(50, 60, 15, 20, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#8B4513'; ctx.beginPath(); ctx.moveTo(35, 50); ctx.quadraticCurveTo(35, 35, 50, 35); ctx.quadraticCurveTo(65, 35, 65, 50); ctx.lineTo(60, 50); ctx.quadraticCurveTo(60, 40, 50, 40); ctx.quadraticCurveTo(40, 40, 40, 50); ctx.closePath(); ctx.fill();
+                ctx.fillStyle = '#654321'; ctx.fillRect(48, 30, 4, 5);
+            } else {
+                const getDarker=(h)=>{ const rgb=parseInt(h.slice(1),16), r=Math.max(0,((rgb>>16)&255)-60), g=Math.max(0,((rgb>>8)&255)-60), b=Math.max(0,(rgb&255)-60); return `rgb(${r},${g},${b})`; };
+                const darker = getDarker(l.col);
+                ctx.fillStyle = l.col; ctx.strokeStyle = darker; ctx.lineWidth = 1.5;
+                const p = new Path2D();
+                if(l.svgType === 0){ p.moveTo(50,10); p.lineTo(55,35); p.lineTo(70,30); p.lineTo(60,50); p.lineTo(80,55); p.lineTo(60,65); p.lineTo(70,85); p.lineTo(50,75); p.lineTo(30,85); p.lineTo(40,65); p.lineTo(20,55); p.lineTo(40,50); p.lineTo(30,30); p.lineTo(45,35); p.closePath(); } 
+                else if(l.svgType === 1){ p.moveTo(50,15); p.quadraticCurveTo(55,20,55,30); p.quadraticCurveTo(60,35,60,40); p.quadraticCurveTo(55,40,55,50); p.quadraticCurveTo(60,55,60,65); p.quadraticCurveTo(55,70,50,85); p.quadraticCurveTo(45,70,40,65); p.quadraticCurveTo(40,55,45,50); p.quadraticCurveTo(40,40,40,40); p.quadraticCurveTo(40,35,45,30); p.quadraticCurveTo(45,20,50,15); } 
+                else { p.moveTo(50,10); p.lineTo(54,32); p.lineTo(68,28); p.lineTo(58,45); p.lineTo(75,48); p.lineTo(60,58); p.lineTo(68,72); p.lineTo(52,65); p.lineTo(50,85); p.lineTo(48,65); p.lineTo(32,72); p.lineTo(40,58); p.lineTo(25,48); p.lineTo(42,45); p.lineTo(32,28); p.lineTo(46,32); p.closePath(); }
+                ctx.fill(p); ctx.beginPath(); ctx.moveTo(50,15); ctx.lineTo(50,75); ctx.stroke();
+            }
+            ctx.restore();
+        });
+
+        // 3. Draw Fireworks
+        fireworkParticles.forEach(p => {
+            ctx.save();
+            ctx.translate(p.x * scaleX, p.y * scaleY);
+            const size = (parseFloat(p.el.style.width)||3) * scaleX;
+            ctx.globalAlpha = p.life; // Fade out
+            ctx.beginPath();
+            ctx.arc(0, 0, size/2, 0, Math.PI*2);
+            ctx.fillStyle = p.el.style.backgroundColor;
+            ctx.shadowColor = p.el.style.color;
+            ctx.shadowBlur = size * 2; 
+            ctx.fill();
+            ctx.restore();
+        });
+        ctx.globalAlpha = 1.0;
+
+        // 4. Frame
+        const frameW = Math.min(w, h) * 0.05;
+        const grad = ctx.createLinearGradient(0, 0, w, h);
+        if(selectedColors.length > 0) grad.addColorStop(0, selectedColors[0].hex);
+        if(selectedColors.length > 1) grad.addColorStop(0.5, selectedColors[1].hex);
+        if(selectedColors.length > 2) grad.addColorStop(1, selectedColors[2].hex);
+        else grad.addColorStop(1, selectedColors[0].hex);
+        
+        ctx.fillStyle = grad;
+        ctx.fillRect(0,0,w,frameW); ctx.fillRect(0,h-frameW,w,frameW);
+        ctx.fillRect(0,frameW,frameW,h-2*frameW); ctx.fillRect(w-frameW,frameW,frameW,h-2*frameW);
+        
+        ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 2;
+        ctx.strokeRect(frameW + 4, frameW + 4, w - frameW*2 - 8, h - frameW*2 - 8);
+
+        // Export as JPEG for speed (0.9 quality)
+        $.captured.src=$.photo.toDataURL('image/jpeg', 0.9);
+        $.videoView.classList.add('hidden'); $.imageView.classList.remove('hidden');
+        $.capture.classList.add('hidden'); $.retake.classList.remove('hidden'); $.download.classList.remove('hidden');
+        stopCam();
+    });
+}
+function retake(){$.info.style.display='block';$.info.style.opacity='1';startCam();}
+function download(){const a=document.createElement('a');a.download=`autumn-${Date.now()}.jpg`;a.href=$.captured.src;a.click();}
+function goBack(){stopCam();$.camera.classList.remove('active');$.colorSelection.classList.add('active');}
+
+$.startBtn.onclick=startCam; $.back.onclick=goBack; $.capture.onclick=takePhoto; $.retake.onclick=retake; $.download.onclick=download;
+document.querySelectorAll('.lang-btn').forEach(btn => { btn.onclick = () => switchLanguage(btn.dataset.lang); });
+document.getElementById('enter-app').onclick = () => { document.getElementById('landing').classList.remove('active'); document.getElementById('color-selection').classList.add('active'); };
+
+initColors(); updateDock();
+</script>
+</body>
+</html>
