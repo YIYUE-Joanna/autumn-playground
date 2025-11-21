@@ -756,7 +756,25 @@ async function startCam(){
         
         if(window.posthog) {
             const colorNames = selectedColors.map(c => c.name);
-            posthog.capture('game_started', { selected_colors: colorNames, color_count: colorNames.length, language: currentLang });
+            
+            // Track individual color selections
+            selectedColors.forEach((color, index) => {
+                posthog.capture('color_selected', {
+                    color_name: color.name,
+                    color_hex: color.hex,
+                    selection_order: index + 1,
+                    language: currentLang
+                });
+            });
+            
+            // Also track the overall game start with all info
+            posthog.capture('game_started', { 
+                color_1: colorNames[0] || null,
+                color_2: colorNames[1] || null,
+                color_3: colorNames[2] || null,
+                color_count: colorNames.length, 
+                language: currentLang 
+            });
         }
         $.colorSelection.classList.remove('active'); $.camera.classList.add('active');
         $.videoView.classList.remove('hidden'); $.imageView.classList.add('hidden');
