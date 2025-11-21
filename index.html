@@ -395,8 +395,8 @@ button{outline:none;user-select:none}
 <div id="landing" class="page active landing-page">
     <div class="landing-content">
         <div class="lang-toggle lang-toggle-landing">
-            <button class="lang-btn lang-btn-simple active" data-lang="zh">中文</button>
-            <button class="lang-btn lang-btn-simple" data-lang="en">English</button>
+            <button class="lang-btn lang-btn-simple active" data-lang="en">English</button>
+            <button class="lang-btn lang-btn-simple" data-lang="zh">中文</button>
         </div>
         <h1 class="landing-title" data-lang-key="main_title">🍂 秋天乐园 🍁</h1>
         <p class="landing-subtitle" data-lang-key="main_subtitle">创造属于你的秋日回忆，让落叶随你的手势起舞。</p>
@@ -426,8 +426,8 @@ button{outline:none;user-select:none}
 <div id="color-selection" class="page color-selection-page">
     <div class="header-elegant">
         <div class="lang-toggle-simple">
-            <button class="lang-btn lang-btn-simple active" data-lang="zh">中文</button>
-            <button class="lang-btn lang-btn-simple" data-lang="en">English</button>
+            <button class="lang-btn lang-btn-simple active" data-lang="en">English</button>
+            <button class="lang-btn lang-btn-simple" data-lang="zh">中文</button>
         </div>
         <h1 class="title" data-lang-key="title">🍂 秋天乐园 🍁</h1>
         <p class="subtitle" data-lang-key="subtitle">请选择 3 种喜欢的秋色，开启你的秋日奇幻之旅</p>
@@ -524,7 +524,7 @@ const translations = {
     }
 };
 
-let currentLang = 'zh';
+let currentLang = 'en';
 function switchLanguage(lang) {
     currentLang = lang;
     document.querySelectorAll('.lang-btn').forEach(btn => { btn.classList.toggle('active', btn.dataset.lang === lang); });
@@ -1056,7 +1056,7 @@ $.startBtn.onclick=startCam; $.back.onclick=goBack; $.capture.onclick=takePhoto;
 document.querySelectorAll('.lang-btn').forEach(btn => { btn.onclick = () => switchLanguage(btn.dataset.lang); });
 document.getElementById('enter-app').onclick = () => { document.getElementById('landing').classList.remove('active'); document.getElementById('color-selection').classList.add('active'); };
 
-initColors(); updateDock();
+initColors(); updateDock(); switchLanguage('en');
 </script>
 </body>
 </html>
