@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <title>🍂 秋天乐园 🍁</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+
+<!-- ────────────────────── PostHog Analytics ────────────────────── -->
+<script>
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog && window.posthog.__loaded)||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init Rr Mr fi Cr Ar ci Tr Fr capture Mi calculateEventProperties Lr register register_once register_for_session unregister unregister_for_session Hr getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey displaySurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty Ur jr createPersonProfile zr kr Br opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing get_explicit_consent_status is_capturing clear_opt_in_out_capturing Dr debug M Nr getPageViewId captureTraceFeedback captureTraceMetric $r".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    posthog.init('phc_t58Cai2liJ7ltyRefaeevaW5c0YkTEPzFpDO0mhORld', {
+        api_host: 'https://us.i.posthog.com',
+        defaults: '2025-05-24',
+        person_profiles: 'identified_only', 
+    })
+</script>
+<!-- ───────────────────────────────────────────────────────────── -->
+
 <style>
 /* ── Reset & Base ── */
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -540,6 +552,10 @@ function switchLanguage(lang) {
         const key = el.getAttribute('data-lang-key');
         if (translations[lang][key]) el.textContent = translations[lang][key];
     });
+    // Track language switch event
+    if(window.posthog) {
+        posthog.capture('language_switched', { new_language: lang });
+    }
     const grid = document.getElementById('color-grid');
     if(grid && grid.innerHTML){ grid.innerHTML = ''; initColors(); updateDock(); }
 }
@@ -753,11 +769,27 @@ async function startCam(){
         cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:1280},height:{ideal:720}},audio:false});
         $.video.srcObject=cameraStream;
         await new Promise(r=>{$.video.onloadedmetadata=()=>{$.video.play();r();}});
+        
+        // TRACKING: Game Started
+        if(window.posthog) {
+            // Get color names
+            const colorNames = selectedColors.map(c => c.name);
+            posthog.capture('game_started', {
+                selected_colors: colorNames, // e.g. ["Maple Red", "Gold"]
+                color_count: colorNames.length,
+                language: currentLang
+            });
+        }
+
         $.colorSelection.classList.remove('active'); $.camera.classList.add('active');
         $.videoView.classList.remove('hidden'); $.imageView.classList.add('hidden');
         $.capture.classList.remove('hidden'); $.retake.classList.add('hidden'); $.download.classList.add('hidden');
         showCountdown();
-    }catch(e){alert(currentLang === 'zh' ? '相机权限被拒' : 'Camera permission denied');goBack();}
+    }catch(e){
+        // TRACKING: Camera Denied/Error
+        if(window.posthog) posthog.capture('camera_error', { error: e.message });
+        alert(currentLang === 'zh' ? '相机权限被拒' : 'Camera permission denied');goBack();
+    }
 }
 
 function showCountdown(){
@@ -900,6 +932,14 @@ function stopCam(){
 }
 
 function takePhoto(){
+    // TRACKING: Photo Taken
+    if(window.posthog) {
+        posthog.capture('photo_taken', {
+            leaf_count: leaves.length,
+            has_fireworks: fireworkParticles.length > 0
+        });
+    }
+
     // Instant feedback
     $.shutter.classList.add('flash');
     setTimeout(() => $.shutter.classList.remove('flash'), 300);
@@ -984,7 +1024,12 @@ function takePhoto(){
     });
 }
 function retake(){$.info.style.display='block';$.info.style.opacity='1';startCam();}
-function download(){const a=document.createElement('a');a.download=`autumn-${Date.now()}.jpg`;a.href=$.captured.src;a.click();}
+function download(){
+    // TRACKING: Photo Downloaded
+    if(window.posthog) posthog.capture('photo_downloaded');
+
+    const a=document.createElement('a');a.download=`autumn-${Date.now()}.jpg`;a.href=$.captured.src;a.click();
+}
 function goBack(){stopCam();$.camera.classList.remove('active');$.colorSelection.classList.add('active');}
 
 $.startBtn.onclick=startCam; $.back.onclick=goBack; $.capture.onclick=takePhoto; $.retake.onclick=retake; $.download.onclick=download;
