@@ -303,7 +303,15 @@ button{outline:none;user-select:none}
 .camera-page{position:relative;width:100vw;height:100vh;background:#000;overflow:hidden}
 .back-button{position:absolute;top:16px;left:16px;z-index:10;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:48px;height:48px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 6px rgba(0,0,0,.1)}
 .video-container{position:relative;width:100%;height:100%}
-#camera-video{width:100%;height:100%;object-fit:cover}
+
+/* ✅【修改 1】添加镜像反转 CSS */
+#camera-video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transform: scaleX(-1); /* 视觉上反转视频 */
+}
+
 #motion-canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;display:none}
 
 .leaf {
@@ -602,9 +610,15 @@ function detectMotion(){
     const cls=cluster(pts); 
     const pw=v.offsetWidth/w, ph=v.offsetHeight/h;
     motionAreas=cls.map(c=>{
-        const cx=c.reduce((s,p)=>s+p.x,0)/c.length; const cy=c.reduce((s,p)=>s+p.y,0)/c.length;
-        // Slight adjustment to sensitivity logic for better mobile control
-        return {x:cx*pw,y:cy*ph,radius:Math.sqrt(c.length)*8,intensity:Math.min(c.length/150,.9)};
+        const cx=c.reduce((s,p)=>s+p.x,0)/c.length; 
+        const cy=c.reduce((s,p)=>s+p.y,0)/c.length;
+        
+        // ✅【修改 2】手势检测坐标反转
+        // 因为视频在CSS里反转了，但Canvas数据没反转。
+        // 用户的“右边”是Canvas数据的“左边”。所以需要反算 X 坐标。
+        const visualX = (w - cx) * pw; 
+        
+        return {x:visualX, y:cy*ph, radius:Math.sqrt(c.length)*8, intensity:Math.min(c.length/150,.9)};
     });
 }
 function toGray(d){const g=new Uint8Array(d.width*d.height); for(let i=0;i<g.length;i++){const p=i*4; g[i]=d.data[p]*.299+d.data[p+1]*.587+d.data[p+2]*.114;} return g;}
@@ -699,16 +713,12 @@ class Leaf{
         motionAreas.forEach(a=>{
             const dx=this.x-a.x, dy=this.y-a.y, dist=Math.hypot(dx,dy);
             if(dist<a.radius){
-                hasMotion=true; 
-                // TUNING: Reduced the multiplier from 3 to 1.2 to prevent "flying away"
-                const f=(a.radius-dist)/a.radius*a.intensity*1.2; 
-                const ang=Math.atan2(dy,dx); 
+                hasMotion=true; const f=(a.radius-dist)/a.radius*a.intensity*1.2; const ang=Math.atan2(dy,dx); 
                 this.vx+=Math.cos(ang)*f; this.vy+=Math.sin(ang)*f; 
                 this.affected=18;
             }
         });
         if(this.affected>0){
-            // TUNING: Clamp maximum velocity so they don't disappear instantly
             this.vx = Math.max(-12, Math.min(12, this.vx));
             this.vy = Math.max(-12, Math.min(12, this.vy));
             
@@ -787,7 +797,6 @@ function showCountdown(){
 
 function initLeaves(){
     const r=$.video.getBoundingClientRect();
-    // OPTIMIZATION: Reduce leaf count on mobile devices to prevent lag
     const isMobile = window.innerWidth < 768;
     const leafCount = isMobile ? 25 : 55; 
     const acornCount = 4;
@@ -907,7 +916,6 @@ function showToast(msg) {
     setTimeout(() => $.toast.classList.remove('show'), 3000);
 }
 
-// Helper to convert DataURL to Blob for Web Share API
 async function dataUrlToFile(dataUrl, fileName) {
     const res = await fetch(dataUrl);
     const blob = await res.blob();
@@ -926,7 +934,13 @@ function takePhoto(){
         $.photo.width=w; $.photo.height=h;
         const ctx=$.photo.getContext('2d'); 
         
+        // ✅【修改 3】拍照时也要反转，否则照片和预览是反的
+        ctx.save();
+        ctx.translate(w, 0);
+        ctx.scale(-1, 1);
         ctx.drawImage(v,0,0,w,h);
+        ctx.restore(); // 恢复正常绘图状态，不然后面的叶子也乱了
+        
         const rect = $.video.getBoundingClientRect();
         const scaleX = w / rect.width;
         const scaleY = h / rect.height;
@@ -994,7 +1008,6 @@ function retake(){$.info.style.display='block';$.info.style.opacity='1';startCam
 async function download(){
     if(window.posthog) posthog.capture('photo_downloaded');
 
-    // Try Web Share API first (Native Mobile Share Sheet)
     if (navigator.share) {
         try {
             const file = await dataUrlToFile($.captured.src, `autumn-${Date.now()}.jpg`);
@@ -1003,14 +1016,12 @@ async function download(){
                 title: 'My Autumn Photo',
                 text: 'Check out my autumn photo!'
             });
-            return; // Share successful, exit
+            return; 
         } catch (err) {
             console.log('Share failed or cancelled', err);
-            // If share fails, fall through to download method
         }
     }
 
-    // Fallback: Create link download
     const a=document.createElement('a');
     a.download=`autumn-${Date.now()}.jpg`;
     a.href=$.captured.src;
@@ -1018,7 +1029,6 @@ async function download(){
     a.click();
     document.body.removeChild(a);
 
-    // Show Hint for iOS/In-App Browsers where download might be blocked
     showToast(translations[currentLang].save_hint);
 }
 
